@@ -1,3 +1,8 @@
+import { downloadAsPDF } from './pdfUtils.js';
+
+
+let isDownloading = false;
+
 document.addEventListener('DOMContentLoaded', () => {
     // DOM Elements
     const result = document.getElementById('result');
@@ -5,11 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const quizBtn = document.getElementById("quizBtn");
     const citationBtn = document.getElementById("citationBtn");
     const voiceBtn = document.getElementById("voiceBtn");
-    const graphBtn = document.getElementById("graphBtn");
     const relatedBtn = document.getElementById("relatedBtn");
     const summarizeBtn = document.getElementById('summarizeBtn');
     const saveBtn = document.getElementById("saveBtn");
-    const textToSave = document.getElementById('result').value;
     
     // Early exit if required elements missing
     if (!result || !summarizeBtn || !statusMessage) {  
@@ -89,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!apiKey) {
                 showStatus('API key required', 'error');
                 result.innerHTML = '<div class="error">Please configure your API key in settings</div>';
+
                 return { text: null, apiKey: null, knowledgeLevel: null };
             }
 
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Gemini API caller
-    async function getSummaryGemini(text, apiKey, prompt, model = 'gemini-1.5-pro') {
+    async function getSummaryGemini(text, apiKey, prompt, model="gemini-2.0-flash") {
         try {
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
             
@@ -240,17 +244,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Button Handlers
     quizBtn?.addEventListener("click", async () => {
         try {
-            const { text, apiKey, buttonType, knowledgeLevel } = await extractingText('quiz');
+            const { text, apiKey, knowledgeLevel } = await extractingText('quiz');
             if (!text || !apiKey) return;
-
-            const prompt = `Create a 5-question quiz at ${knowledgeLevel} level about this text. Format each with:
-            - Clear question
-            - 4 options (a-d)
-            - Mark correct answer with (Correct)
-            Use ${knowledgeLevel}-appropriate language:`;
+    
+            const prompt = `Create 5 quiz questions (with 4 options each, mark correct answer) 
+            at ${knowledgeLevel} level about this text:`;
             
-            const quiz = await getSummaryDeepSeek(text, apiKey, prompt);
-            result.innerHTML = formatContent(quiz, 'quiz');
+            const quizContent = await getSummaryGemini(text, apiKey, prompt);
+            result.innerHTML = formatContent(quizContent, 'quiz');
         } catch (error) {
             result.innerHTML = `<div class="error">Quiz Error: ${error.message}</div>`;
         }
@@ -322,8 +323,40 @@ document.addEventListener('DOMContentLoaded', () => {
             result.innerHTML = `<div class="error">Summary Error: ${error.message}</div>`;
         }
     });
+
+    saveBtn?.addEventListener("click", async function handleSave() {
+        if (isDownloading) return;
+        isDownloading = true;
+        
+        try {
+            // Get the current result content
+            const resultContent = document.getElementById('result').innerHTML;
+            
+            // Create a temporary div to extract clean text from HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = resultContent;
+            const cleanText = tempDiv.textContent || tempDiv.innerText || '';
+            
+            // Download as PDF
+            const success = await downloadAsPDF(cleanText, 'summary.pdf');
+            
+            if (!success) {
+                showStatus('PDF generation failed', 'error');
+            } else {
+                showStatus('PDF saved successfully', 'success');
+                // Send message AFTER successful download
+                chrome.runtime.sendMessage({ 
+                    type: "save_summary",
+                    content: cleanText 
+                });
+            }
+            
+        } catch (error) {
+            console.error('Save error:', error);
+            showStatus('Save failed: ' + error.message, 'error');
+        } finally {
+            isDownloading = false;
+        }
+    });
 });
 
-saveBtn.addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "save_summary" });
-  });

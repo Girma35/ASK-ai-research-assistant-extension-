@@ -16,3 +16,4 @@ function getArticle() {
     }
   });
   
+  

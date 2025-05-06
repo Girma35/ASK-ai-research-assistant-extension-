@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extension Settings</title>
+    <link rel="stylesheet" href="../css/options.css">
+</head>
+<body>
+    <div id="ask-ai-extension">
+        <div class="container">
+            <h1>Extension Settings</h1>
+            
+            <form id="optionsForm">
+                <div class="form-group">
+                    <label>Select AI Service</label>
+                    <div class="ai-selector">
+                        <div class="ai-option" data-ai="gemini">
+                            <img id="gemini-icon" src="" alt="Gemini">
+                            <h3>Google Gemini</h3>
+                            <p>Advanced AI by Google</p>
+                        </div>
+                        <div class="ai-option" data-ai="deepseek">
+                            <img id="deepseek-icon" src="" alt="DeepSeek">
+                            <h3>DeepSeek</h3>
+                            <p>Powerful open-source AI</p>
+                        </div>
+                    </div>
+                    <input type="hidden" id="selectedAI" name="selectedAI" value="gemini">
+                </div>
+
+                
+                <div class="form-group gemini-fields">
+                    <label for="apiKey">Gemini API Key</label>
+                    <input type="password" id="apiKey" name="apiKey" placeholder="Enter your Gemini API key" autocomplete="off">
+                    <p class="help-text">
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank">
+                            Get your Gemini API key from Google AI Studio
+                        </a>
+                    </p>
+                </div>
+                
+                <div class="form-group deepseek-fields">
+                    <label for="deepseekApiKey">DeepSeek API Key</label>
+                    <input type="password" id="deepseekApiKey" name="deepseekApiKey" placeholder="Enter your DeepSeek API key" autocomplete="off">
+                    <p class="help-text">
+                        <a href="https://platform.deepseek.com/" target="_blank">
+                            Get your DeepSeek API key
+                        </a>
+                    </p>
+                </div>
+
+
+                <div class="form-group">
+                    <label for="knowledgeLevel">Level of Knowledge</label>
+                    <select id="knowledgeLevel" name="knowledgeLevel">
+                        <option value="child">Child (5-12 years)</option>
+                        <option value="teen">Teenager (13-19 years)</option>
+                        <option value="undergrad">Undergraduate Student</option>
+                        <option value="graduate">Graduate Student</option>
+                        <option value="phd">PhD/Expert Level</option>
+                    </select>
+                    <p class="help-text">
+                        Select the complexity level for responses
+                    </p>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="saveBtn">Save Settings</button>
+                    <div class="test-buttons" id="testButtons">
+                        <button type="button" id="testGeminiApiBtn">Test Gemini API</button>
+                        <button type="button" id="testDeepseekApiBtn">Test DeepSeek API</button>
+                    </div>
+                </div>
+            </form>
+            
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+    </div>
+    <script src="../js/options.js"></script>
+<script defer src="js/vendors-node_modules_babel_runtime_regenerator_index_js-node_modules_babel_runtime_helpers_es-58772e.js"></script><script defer src="js/options.js"></script></body>
+</html>
